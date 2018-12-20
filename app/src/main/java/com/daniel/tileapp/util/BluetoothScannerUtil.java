@@ -1,4 +1,4 @@
-package com.daniel.tileapp;
+package com.daniel.tileapp.util;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -38,6 +38,6 @@ public class BluetoothScannerUtil {
                 bluetoothLeScanner.stopScan(callback);
                 Log.d(TAG, "Stopping scan");
             }
-        }, 5000);
+        }, 10000);
     }
 }
