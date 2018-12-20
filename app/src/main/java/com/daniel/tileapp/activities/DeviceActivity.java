@@ -1,5 +1,6 @@
 package com.daniel.tileapp.activities;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -7,6 +8,9 @@ import android.widget.Toast;
 
 import com.daniel.tileapp.R;
 import com.daniel.tileapp.tile.BluetoothTile;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -17,6 +21,8 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
 
     private BluetoothTile connectedTile;
     private String deviceName;
+
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,19 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
 
         // Connect to the tile
         connectedTile = new BluetoothTile(mac, this);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Connecting to the tile...");
+        progressDialog.show();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (progressDialog != null) {
+                    finish();
+                }
+            }
+        }, 10000);
     }
 
     @Override
@@ -59,5 +78,7 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
     @Override
     public void connected() {
         runOnUiThread(() -> deviceNameTextView.setText(deviceName + " - Connected"));
+        progressDialog.dismiss();
+        progressDialog = null;
     }
 }
