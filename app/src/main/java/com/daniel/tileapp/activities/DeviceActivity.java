@@ -59,7 +59,7 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
                     runOnUiThread(() -> connectionFailed());
                 }
             }
-        }, 10000);
+        }, 8000);
     }
 
     private void connectionFailed() {
