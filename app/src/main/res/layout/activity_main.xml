@@ -25,34 +25,15 @@
             android:layout_height="wrap_content"
             android:text="Scan" />
 
-        <Button
-            android:id="@+id/connectBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Connect" />
-
-        <Button
-            android:id="@+id/alarmOnBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alarm On" />
-
-        <Button
-            android:id="@+id/alarmOffBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alarm Off" />
-
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/devicesTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="TextView"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/devicesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 

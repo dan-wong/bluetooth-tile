@@ -1,15 +1,19 @@
 package com.daniel.tileapp.activities;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.daniel.tileapp.R;
-import com.daniel.tileapp.tile.BluetoothTile;
+import com.daniel.tileapp.misc.DividerItemDecoration;
+import com.daniel.tileapp.tile.BluetoothTileRecyclerViewAdapter;
 import com.daniel.tileapp.util.BluetoothScannerUtil;
 
 import java.util.ArrayList;
@@ -19,25 +23,28 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BluetoothTileRecyclerViewAdapter.BluetoothTileListener {
+    public static final String DEVICE_NAME = "com.daniel.tileapp.device.name";
+    public static final String DEVICE_MAC = "com.daniel.tileapp.device.mac";
+
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.devicesTextView) TextView devicesTextView;
+    @BindView(R.id.devicesRecyclerView) RecyclerView devicesRecyclerView;
 
-    private List<BluetoothDevice> devices = new ArrayList<>();
-    private BluetoothTile connectedTile;
+    private MutableLiveData<List<BluetoothDevice>> devices = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (connectedTile != null) connectedTile.disconnect();
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        devicesRecyclerView.setLayoutManager(layoutManager);
+        devicesRecyclerView.addItemDecoration(new DividerItemDecoration(getDrawable(R.drawable.drawable_divider)));
+
+        final Observer<List<BluetoothDevice>> devicesObserver = bluetoothDevices -> devicesRecyclerView.setAdapter(new BluetoothTileRecyclerViewAdapter(bluetoothDevices, this));
+        devices.observe(this, devicesObserver);
     }
 
     @OnClick(R.id.scanBtn)
@@ -45,33 +52,12 @@ public class MainActivity extends AppCompatActivity {
         BluetoothScannerUtil.scan(scanCallback);
     }
 
-    @OnClick(R.id.connectBtn)
-    public void connectBtn() {
-        if (devices.size() == 0) {
-            Toast.makeText(this, "No devices found!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        connectedTile = new BluetoothTile(devices.get(0));
-    }
-
-    @OnClick(R.id.alarmOnBtn)
-    public void alarmOnBtn() {
-        if (connectedTile == null) {
-            Toast.makeText(this, "Device not connected!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        connectedTile.turnOnAlarm();
-    }
-
-    @OnClick(R.id.alarmOffBtn)
-    public void alarmOffBtn() {
-        if (connectedTile == null) {
-            Toast.makeText(this, "Device not connected!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        connectedTile.turnOffAlarm();
+    @Override
+    public void tileSelected(BluetoothDevice device) {
+        Intent intent = new Intent(this, DeviceActivity.class);
+        intent.putExtra(DEVICE_NAME, device.getName());
+        intent.putExtra(DEVICE_MAC, device.getAddress());
+        startActivity(intent);
     }
 
     private final ScanCallback scanCallback = new ScanCallback() {
@@ -79,15 +65,13 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
 
-            if (!devices.contains(result.getDevice())) {
-                devices.add(result.getDevice());
+            if (devices.getValue() == null) devices.setValue(new ArrayList<>());
 
-                StringBuilder sb = new StringBuilder();
-                sb.append("Device Name: ").append(result.getDevice().getName()).append("\n");
-                sb.append("Device Address: ").append(result.getDevice().getAddress()).append("\n");
-                sb.append("Device RSSI: ").append(result.getRssi()).append("\n");
+            if (!devices.getValue().contains(result.getDevice())) {
+                List<BluetoothDevice> newDeviceList = devices.getValue();
+                newDeviceList.add(result.getDevice());
 
-                devicesTextView.setText(sb.toString());
+                devices.postValue(newDeviceList);
             }
         }
     };
