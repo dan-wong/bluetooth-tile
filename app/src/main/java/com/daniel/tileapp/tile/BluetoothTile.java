@@ -30,8 +30,7 @@ public class BluetoothTile {
                 if (newState == 0) {
                     Log.d(TAG, "Disconnected");
                 } else if (newState == 2) {
-                    Log.d(TAG, "Connected - beginning service scan");
-                    gatt.discoverServices();
+                    Log.d(TAG, "Connected - beginning service scan "  + gatt.discoverServices());
                 }
             }
 
