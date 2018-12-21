@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.daniel.tileapp.R;
@@ -18,6 +19,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class DeviceActivity extends AppCompatActivity implements BluetoothTile.BluetoothTileListener {
+    private static final String TAG = DeviceActivity.class.getSimpleName();
+
     @BindView(R.id.deviceNameTextView) TextView deviceNameTextView;
 
     private String deviceName, mac;
@@ -84,6 +87,9 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
     @Override
     public void connected() {
         runOnUiThread(() -> deviceNameTextView.setText(deviceName + " - Connected"));
+        if (connectedTile.setCharacteristicNotification()) {
+            Log.i(TAG, "Characteristic notification set");
+        }
         progressDialog.dismiss();
         progressDialog = null;
     }

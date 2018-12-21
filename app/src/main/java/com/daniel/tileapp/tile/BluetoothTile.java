@@ -5,19 +5,26 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
 import com.daniel.tileapp.BaseApplication;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 public class BluetoothTile {
     private static final String TAG = BluetoothTile.class.getSimpleName();
+
     private static final UUID RX_ALARM_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
     private static final UUID RX_CHAR_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
+    private static final UUID RX_KEY_PRESS_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
+    private static final UUID RX_KEY_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
+
+    private static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private final BluetoothGatt bluetoothGatt;
     private List<BluetoothTileListener> listeners = new LinkedList<>();
@@ -43,6 +50,11 @@ public class BluetoothTile {
                     Log.d(TAG, "onServicesDiscovered received: " + status);
                 }
             }
+
+            @Override
+            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+                Log.i(TAG, Arrays.toString(characteristic.getValue()));
+            }
         };
         this.bluetoothGatt = bluetoothDevice.connectGatt(BaseApplication.getInstance(), false, gattCallback);
     }
@@ -62,6 +74,17 @@ public class BluetoothTile {
 
     public void turnOffAlarm() {
         writeRXCharacteristic(new byte[1], bluetoothGatt);
+    }
+
+    public boolean setCharacteristicNotification() {
+        BluetoothGattService keyService = bluetoothGatt.getService(RX_KEY_UUID);
+        BluetoothGattCharacteristic keyPressCharacteristic = keyService.getCharacteristic(RX_KEY_PRESS_UUID);
+        BluetoothGattDescriptor descriptor = keyPressCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+        bluetoothGatt.writeDescriptor(descriptor);
+
+        return this.bluetoothGatt.setCharacteristicNotification(keyPressCharacteristic, true);
     }
 
     private void writeRXCharacteristic(byte[] data, final BluetoothGatt bluetoothGatt) {
