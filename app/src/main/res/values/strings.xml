@@ -1,10 +1,15 @@
 <resources>
     <string name="app_name">TileApp</string>
     <string name="title_activity_main2">Main2Activity</string>
-    <string name="beginning_scan">Beginning scan...</string>
-    <string name="connecting_in_progress">Connecting...</string>
+    <string name="beginning_scan">Beginning scan…</string>
+    <string name="connecting_in_progress">Connecting…</string>
     <string name="try_again">Would you like to try again?</string>
     <string name="connection_failed">Connection Failed</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="connection">Connection</string>
+    <string name="connect">Connect</string>
+    <string name="device_name">Device Name</string>
 </resources>

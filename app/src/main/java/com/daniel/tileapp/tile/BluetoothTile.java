@@ -19,11 +19,19 @@ import java.util.UUID;
 public class BluetoothTile {
     private static final String TAG = BluetoothTile.class.getSimpleName();
 
+    /* Constants for Device alarm */
     private static final UUID RX_ALARM_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
     private static final UUID RX_CHAR_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
+
+    /* Constants for Receiving key press */
     private static final UUID RX_KEY_PRESS_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
     private static final UUID RX_KEY_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
 
+    /* Constants for getting the battery level of the device */
+    private static final UUID BATTERY_LEVEL_UUID = UUID.fromString("00002A19-0000-1000-8000-00805F9B34FB");
+    private static final UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805F9B34FB");
+
+    /* Constant for setting notification on device */
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private final BluetoothGatt bluetoothGatt;
@@ -45,6 +53,8 @@ public class BluetoothTile {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.d(TAG, "Services discovered");
+
+                    setKeyPressNotification();
                     listeners.forEach(BluetoothTileListener::connected);
                 } else {
                     Log.d(TAG, "onServicesDiscovered received: " + status);
@@ -52,10 +62,16 @@ public class BluetoothTile {
             }
 
             @Override
+            public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+                Log.d(TAG, Arrays.toString(characteristic.getValue()) + " - Status: " + status);
+            }
+
+            @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 Log.i(TAG, Arrays.toString(characteristic.getValue()));
             }
         };
+
         this.bluetoothGatt = bluetoothDevice.connectGatt(BaseApplication.getInstance(), false, gattCallback);
     }
 
@@ -76,15 +92,22 @@ public class BluetoothTile {
         writeRXCharacteristic(new byte[1], bluetoothGatt);
     }
 
-    public boolean setCharacteristicNotification() {
+    public void setKeyPressNotification() {
         BluetoothGattService keyService = bluetoothGatt.getService(RX_KEY_UUID);
         BluetoothGattCharacteristic keyPressCharacteristic = keyService.getCharacteristic(RX_KEY_PRESS_UUID);
+
         BluetoothGattDescriptor descriptor = keyPressCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-
         bluetoothGatt.writeDescriptor(descriptor);
 
-        return this.bluetoothGatt.setCharacteristicNotification(keyPressCharacteristic, true);
+        this.bluetoothGatt.setCharacteristicNotification(keyPressCharacteristic, true);
+    }
+
+    public void readBatteryLevel() {
+        BluetoothGattService batteryService = bluetoothGatt.getService(BATTERY_SERVICE_UUID);
+        BluetoothGattCharacteristic batteryLevelCharacteristic = batteryService.getCharacteristic(BATTERY_LEVEL_UUID);
+
+        this.bluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
     }
 
     private void writeRXCharacteristic(byte[] data, final BluetoothGatt bluetoothGatt) {

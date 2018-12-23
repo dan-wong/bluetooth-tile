@@ -1,4 +1,4 @@
-package com.daniel.tileapp.util;
+package com.daniel.tileapp.bluetoothscanner;
 
 import android.bluetooth.le.ScanCallback;
 import android.os.AsyncTask;
@@ -12,7 +12,7 @@ public class BluetoothScannerAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        BluetoothScannerUtil.scan(callback);
+        BluetoothScanner.scan(callback);
         return null;
     }
 }

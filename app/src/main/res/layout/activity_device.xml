@@ -6,43 +6,146 @@
     android:layout_height="match_parent"
     tools:context=".activities.DeviceActivity">
 
-    <TextView
-        android:id="@+id/deviceNameTextView"
-        android:layout_width="wrap_content"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Device Name"
-        android:textColor="@color/primary_text"
-        android:textSize="18sp"
+        android:background="#81d4fa"
+        android:elevation="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <LinearLayout
+        <TextView
+            android:id="@+id/deviceNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="64dp"
+            android:text="ITAG"
+            android:textColor="@android:color/white"
+            android:textSize="30sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/macTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="64dp"
+            android:layout_marginBottom="40dp"
+            android:text="TextView"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/deviceNameTextView" />
+
+        <ImageButton
+            android:id="@+id/editDeviceNameBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="67dp"
+            android:background="?android:selectableItemBackground"
+            android:padding="5dp"
+            app:layout_constraintStart_toEndOf="@+id/deviceNameTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_edit_white_24dp" />
+
+        <ImageButton
+            android:id="@+id/toggleAlarmBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="42dp"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_notifications_active_white_24dp" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/deviceNameTextView">
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
-        <Button
-            android:id="@+id/alarmOnBtn"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alarm On" />
+            android:layout_height="match_parent"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="32dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/alarmOffBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alarm Off" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/connectionStatusTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Connection Status"
+                android:textAllCaps="true"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/connectionTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_weight="4"
+                    android:text="@string/connecting_in_progress"
+                    android:textColor="@color/primary_text"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/disconnectBtn"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:text="Disconnect" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:id="@+id/rssiTextViewTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RSSI"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/rssiTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
 
 </android.support.constraint.ConstraintLayout>

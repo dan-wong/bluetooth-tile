@@ -18,9 +18,9 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.daniel.tileapp.R;
+import com.daniel.tileapp.bluetoothscanner.BluetoothScannerAsyncTask;
 import com.daniel.tileapp.misc.DividerItemDecoration;
 import com.daniel.tileapp.tile.BluetoothTileRecyclerViewAdapter;
-import com.daniel.tileapp.util.BluetoothScannerAsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;

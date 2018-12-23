@@ -1,4 +1,4 @@
-package com.daniel.tileapp.util;
+package com.daniel.tileapp.bluetoothscanner;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BluetoothScannerUtil {
-    private static final String TAG = BluetoothScannerUtil.class.getSimpleName();
+public class BluetoothScanner {
+    private static final String TAG = BluetoothScanner.class.getSimpleName();
     private static final ParcelUuid serviceUuid = ParcelUuid.fromString("00001802-0000-1000-8000-00805f9b34fb");
 
     public static void scan(ScanCallback callback) {
