@@ -12,4 +12,5 @@
     <string name="connection">Connection</string>
     <string name="connect">Connect</string>
     <string name="device_name">Device Name</string>
+    <string name="disconnect">Disconnect</string>
 </resources>

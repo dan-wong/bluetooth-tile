@@ -29,11 +29,13 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
     @BindView(R.id.deviceNameTextView) TextView deviceNameTextView;
     @BindView(R.id.macTextView) TextView macTextView;
     @BindView(R.id.connectionTextView) TextView connectionTextView;
+    @BindView(R.id.rssiTextView) TextView rssiTextView;
     @BindView(R.id.toggleAlarmBtn) ImageButton toggleAlarmBtn;
+    @BindView(R.id.editDeviceNameBtn) ImageButton editDeviceNameBtn;
     @BindView(R.id.disconnectBtn) Button disconnectBtn;
 
     private String deviceName, mac;
-    private boolean alarmOn = false;
+    private boolean alarmOn = false, connected = true;
     private BluetoothTile connectedTile;
     private ProgressDialog progressDialog;
 
@@ -52,10 +54,24 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
         attemptConnection();
 
         toggleAlarmBtn.setOnClickListener(view -> {
+            if (!connected) {
+                disconnectedPrompt();
+                return;
+            }
+
             if (alarmOn) {
                 turnOffAlarm();
             } else {
                 turnOnAlarm();
+            }
+        });
+
+        disconnectBtn.setOnClickListener(view -> {
+            if (connected) {
+                connectedTile.disconnect();
+                connected = false;
+            } else {
+                attemptConnection();
             }
         });
     }
@@ -63,8 +79,16 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        connectedTile.disconnect();
+        if (connectedTile != null) connectedTile.disconnect();
         if (progressDialog != null) progressDialog.cancel();
+    }
+
+    private void disconnectedPrompt() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.disconnected);
+        builder.setMessage("You are not currently connected!")
+                .setPositiveButton("OK", (dialog, id) -> dialog.dismiss());
+        builder.create().show();
     }
 
     private void turnOnAlarm() {
@@ -72,12 +96,12 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
         toggleAlarmBtn.setImageResource(R.drawable.ic_notifications_off_white_24dp);
         alarmOn = true;
 
+        connectedTile.readRemoteRssi();
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(() -> {
-                    turnOffAlarm();
-                });
+                runOnUiThread(() -> turnOffAlarm());
             }
         }, 10000);
     }
@@ -100,7 +124,7 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
                     runOnUiThread(DeviceActivity.this::connectionFailed);
                 }
             }
-        }, 8000);
+        }, 10000);
     }
 
     private void showConnectionProgressDialog() {
@@ -120,6 +144,11 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
 
     @OnClick(R.id.editDeviceNameBtn)
     public void editDeviceNameBtn() {
+        if (!connected) {
+            disconnectedPrompt();
+            return;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View view = inflater.inflate(R.layout.input_device_name_dialog, null);
@@ -141,8 +170,26 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
 
     @Override
     public void connected() {
-        runOnUiThread(() -> connectionTextView.setText(getString(R.string.connected)));
+        runOnUiThread(() -> {
+            connectionTextView.setText(getString(R.string.connected));
+            disconnectBtn.setText(getString(R.string.disconnect));
+        });
         progressDialog.dismiss();
         progressDialog = null;
+        connected = true;
+    }
+
+    @Override
+    public void disconnected() {
+        runOnUiThread(() -> {
+            connectionTextView.setText(R.string.disconnected);
+            disconnectBtn.setText(R.string.connect);
+        });
+        connected = false;
+    }
+
+    @Override
+    public void remoteRssi(int rssi) {
+        rssiTextView.setText(String.valueOf(rssi));
     }
 }

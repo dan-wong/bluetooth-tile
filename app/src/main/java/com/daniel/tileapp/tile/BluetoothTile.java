@@ -44,6 +44,7 @@ public class BluetoothTile {
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 if (newState == 0) {
                     Log.d(TAG, "Disconnected");
+                    listeners.forEach(BluetoothTileListener::disconnected);
                 } else if (newState == 2) {
                     Log.d(TAG, "Connected - beginning service scan "  + gatt.discoverServices());
                 }
@@ -59,6 +60,11 @@ public class BluetoothTile {
                 } else {
                     Log.d(TAG, "onServicesDiscovered received: " + status);
                 }
+            }
+
+            @Override
+            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+                listeners.forEach(l -> l.remoteRssi(rssi));
             }
 
             @Override
@@ -110,6 +116,10 @@ public class BluetoothTile {
         this.bluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
     }
 
+    public void readRemoteRssi() {
+        bluetoothGatt.readRemoteRssi();
+    }
+
     private void writeRXCharacteristic(byte[] data, final BluetoothGatt bluetoothGatt) {
         String mac = bluetoothGatt.getDevice().getAddress();
         BluetoothGattService rxService = bluetoothGatt.getService(RX_ALARM_UUID);
@@ -124,5 +134,7 @@ public class BluetoothTile {
 
     public interface BluetoothTileListener {
         void connected();
+        void disconnected();
+        void remoteRssi(int rssi);
     }
 }
