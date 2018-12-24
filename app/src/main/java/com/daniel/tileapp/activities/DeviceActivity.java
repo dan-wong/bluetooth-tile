@@ -30,6 +30,7 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
     @BindView(R.id.macTextView) TextView macTextView;
     @BindView(R.id.connectionTextView) TextView connectionTextView;
     @BindView(R.id.rssiTextView) TextView rssiTextView;
+    @BindView(R.id.batteryTextView) TextView batteryTextView;
     @BindView(R.id.toggleAlarmBtn) ImageButton toggleAlarmBtn;
     @BindView(R.id.editDeviceNameBtn) ImageButton editDeviceNameBtn;
     @BindView(R.id.disconnectBtn) Button disconnectBtn;
@@ -51,29 +52,12 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
         mac = getIntent().getExtras().getString(MainActivity.DEVICE_MAC);
         macTextView.setText(mac);
 
+        toggleAlarmBtn.setOnClickListener(toggleAlarmBtnOnClickListener);
+        disconnectBtn.setOnClickListener(toggleDisconnectBtnOnClickListener);
+
         attemptConnection();
 
-        toggleAlarmBtn.setOnClickListener(view -> {
-            if (!connected) {
-                disconnectedPrompt();
-                return;
-            }
-
-            if (alarmOn) {
-                turnOffAlarm();
-            } else {
-                turnOnAlarm();
-            }
-        });
-
-        disconnectBtn.setOnClickListener(view -> {
-            if (connected) {
-                connectedTile.disconnect();
-                connected = false;
-            } else {
-                attemptConnection();
-            }
-        });
+        batteryTextView.setOnClickListener(view -> connectedTile.readBatteryLevel());
     }
 
     @Override
@@ -110,6 +94,7 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
         connectedTile.turnOffAlarm();
         toggleAlarmBtn.setImageResource(R.drawable.ic_notifications_active_white_24dp);
         alarmOn = false;
+        connectedTile.readBatteryLevel();
     }
 
     private void attemptConnection() {
@@ -124,12 +109,14 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
                     runOnUiThread(DeviceActivity.this::connectionFailed);
                 }
             }
-        }, 10000);
+        }, 8000);
     }
 
     private void showConnectionProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.connecting_in_progress));
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
     }
 
@@ -177,6 +164,14 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
         progressDialog.dismiss();
         progressDialog = null;
         connected = true;
+
+        connectedTile.readBatteryLevel();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                connectedTile.readRemoteRssi();
+            }
+        }, 2000);
     }
 
     @Override
@@ -190,6 +185,42 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothTile.B
 
     @Override
     public void remoteRssi(int rssi) {
-        rssiTextView.setText(String.valueOf(rssi));
+        runOnUiThread(() -> rssiTextView.setText(String.valueOf(rssi)));
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (connected) {
+                    connectedTile.readRemoteRssi();
+                }
+            }
+        }, 5000);
     }
+
+    @Override
+    public void batteryLevel(int level) {
+        runOnUiThread(() -> batteryTextView.setText(String.format("%d%%", level)));
+    }
+
+    private final View.OnClickListener toggleAlarmBtnOnClickListener = view -> {
+        if (!connected) {
+            disconnectedPrompt();
+            return;
+        }
+
+        if (alarmOn) {
+            turnOffAlarm();
+        } else {
+            turnOnAlarm();
+        }
+    };
+
+    private final View.OnClickListener toggleDisconnectBtnOnClickListener = view -> {
+        if (connected) {
+            connectedTile.disconnect();
+            connected = false;
+        } else {
+            attemptConnection();
+        }
+    };
 }

@@ -7,6 +7,8 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.daniel.tileapp.BaseApplication;
@@ -34,7 +36,7 @@ public class BluetoothTile {
     /* Constant for setting notification on device */
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    private final BluetoothGatt bluetoothGatt;
+    private BluetoothGatt bluetoothGatt;
     private List<BluetoothTileListener> listeners = new LinkedList<>();
 
     public BluetoothTile(String mac) {
@@ -46,7 +48,8 @@ public class BluetoothTile {
                     Log.d(TAG, "Disconnected");
                     listeners.forEach(BluetoothTileListener::disconnected);
                 } else if (newState == 2) {
-                    Log.d(TAG, "Connected - beginning service scan "  + gatt.discoverServices());
+                    Log.d(TAG, "Connected");
+                    gatt.discoverServices();
                 }
             }
 
@@ -54,8 +57,6 @@ public class BluetoothTile {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.d(TAG, "Services discovered");
-
-                    setKeyPressNotification();
                     listeners.forEach(BluetoothTileListener::connected);
                 } else {
                     Log.d(TAG, "onServicesDiscovered received: " + status);
@@ -69,7 +70,7 @@ public class BluetoothTile {
 
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                Log.d(TAG, Arrays.toString(characteristic.getValue()) + " - Status: " + status);
+                listeners.forEach(l -> l.batteryLevel(Integer.valueOf(characteristic.getValue()[0])));
             }
 
             @Override
@@ -78,7 +79,7 @@ public class BluetoothTile {
             }
         };
 
-        this.bluetoothGatt = bluetoothDevice.connectGatt(BaseApplication.getInstance(), false, gattCallback);
+        new Handler(Looper.getMainLooper()).post(() -> bluetoothGatt = bluetoothDevice.connectGatt(BaseApplication.getInstance(), false, gattCallback));
     }
 
     public BluetoothTile(String mac, BluetoothTileListener listener) {
@@ -111,7 +112,16 @@ public class BluetoothTile {
 
     public void readBatteryLevel() {
         BluetoothGattService batteryService = bluetoothGatt.getService(BATTERY_SERVICE_UUID);
+        if (batteryService == null) {
+            Log.e(TAG, "Battery Service not found");
+            return;
+        }
+
         BluetoothGattCharacteristic batteryLevelCharacteristic = batteryService.getCharacteristic(BATTERY_LEVEL_UUID);
+        if (batteryLevelCharacteristic == null) {
+            Log.e(TAG, "Battery Level Characteristic not found");
+            return;
+        }
 
         this.bluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
     }
@@ -136,5 +146,6 @@ public class BluetoothTile {
         void connected();
         void disconnected();
         void remoteRssi(int rssi);
+        void batteryLevel(int level);
     }
 }

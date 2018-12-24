@@ -90,7 +90,7 @@
                 android:id="@+id/connectionStatusTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Connection Status"
+                android:text="@string/connection_status"
                 android:textAllCaps="true"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold" />
@@ -117,7 +117,7 @@
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:padding="1dp"
-                    android:text="Disconnect" />
+                    android:text="@string/disconnect" />
             </LinearLayout>
 
             <View
@@ -128,10 +128,10 @@
                 android:background="@android:color/darker_gray" />
 
             <TextView
-                android:id="@+id/rssiTextViewTitle"
+                android:id="@+id/rssiTitleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="RSSI"
+                android:text="@string/rssi"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold" />
 
@@ -139,7 +139,25 @@
                 android:id="@+id/rssiTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="@string/rssi"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/batteryTitleTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/battery"
+                android:textAllCaps="true"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/batteryTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/battery"
                 android:textColor="@color/primary_text"
                 android:textSize="18sp" />
 
