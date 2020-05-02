@@ -6,9 +6,10 @@ The app that works with the tile was pretty bad ([link](https://play.google.com/
 
 ## Permissions
 As declared in the manifest, three permissions are required.
+- android.permission.BLUETOOTH
+- android.permission.BLUETOOTH_ADMIN
+- android.permission.ACCESS_COARSE_LOCATION
 
-android.permission.BLUETOOTH
-android.permission.BLUETOOTH_ADMIN
-android.permission.ACCESS_COARSE_LOCATION
-
-For why ACCESS_COARSE_LOCATION is required, see https://issuetracker.google.com/issues/37065090 and https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
+For why ACCESS_COARSE_LOCATION is required, see 
+- https://issuetracker.google.com/issues/37065090
+- https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
