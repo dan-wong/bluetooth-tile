@@ -26,11 +26,16 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 public class MainActivity extends AppCompatActivity implements BluetoothTileRecyclerViewAdapter.BluetoothTileListener {
     public static final String DEVICE_NAME = "com.daniel.tileapp.device.name";
     public static final String DEVICE_MAC = "com.daniel.tileapp.device.mac";
 
+    private final int REQUEST_LOCATION_PERMISSION = 1;
     private static final int REQUEST_ENABLE_BT = 1;
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -56,9 +61,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothTileRecy
         devices.observe(this, devicesObserver);
     }
 
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
     private void startBluetoothScan() {
-        new BluetoothScannerAsyncTask(scanCallback).execute();
-        Toast.makeText(this, "Scanning...", Toast.LENGTH_SHORT).show();
+        if (EasyPermissions.hasPermissions(this, ACCESS_COARSE_LOCATION)) {
+            new BluetoothScannerAsyncTask(scanCallback).execute();
+            Toast.makeText(this, "Scanning...", Toast.LENGTH_SHORT).show();
+        } else {
+            EasyPermissions.requestPermissions(this, "Please grant the coarse location permission", REQUEST_LOCATION_PERMISSION, ACCESS_COARSE_LOCATION);
+        }
     }
 
     private void checkBluetoothEnabled() {
@@ -84,6 +94,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothTileRecy
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
     public void tileSelected(BluetoothDevice device) {
         Intent intent = new Intent(this, DeviceActivity.class);
         intent.putExtra(DEVICE_NAME, device.getName());
@@ -102,6 +118,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothTileRecy
 
                 devices.postValue(newDeviceList);
             }
+
+            Toast.makeText(getApplicationContext(), "Scan complete", Toast.LENGTH_SHORT).show();
         }
     };
 }
