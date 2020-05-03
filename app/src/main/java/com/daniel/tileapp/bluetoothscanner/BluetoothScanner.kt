@@ -4,9 +4,9 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanSettings
-import android.os.Handler
 import android.os.ParcelUuid
 import android.util.Log
+import java.util.*
 
 private const val TAG: String = "BluetoothScanner"
 private val serviceUuid = ParcelUuid.fromString("00001802-0000-1000-8000-00805f9b34fb")
@@ -24,8 +24,10 @@ fun bluetoothScan(callback: ScanCallback?) {
     Log.d(TAG, "Starting scan")
     bluetoothLeScanner.startScan(scanFilters, scanSettings, callback)
 
-    Handler().postDelayed({
-        bluetoothLeScanner.stopScan(callback)
-        Log.d(TAG, "Stopping scan")
+    Timer().schedule(object : TimerTask() {
+        override fun run() {
+            bluetoothLeScanner.stopScan(callback)
+            Log.d(TAG, "Stopping scan")
+        }
     }, 5000)
 }
