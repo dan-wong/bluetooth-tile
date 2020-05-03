@@ -38,6 +38,6 @@ public class BluetoothScanner {
                 bluetoothLeScanner.stopScan(callback);
                 Log.d(TAG, "Stopping scan");
             }
-        }, 10000);
+        }, 5000);
     }
 }
