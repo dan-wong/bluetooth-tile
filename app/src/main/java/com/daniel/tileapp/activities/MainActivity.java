@@ -84,13 +84,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothTileRecy
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch(requestCode) {
-            case 1:
-                if (resultCode == Activity.RESULT_OK) {
-                    startBluetoothScan();
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    Toast.makeText(this, "Bluetooth needs to be enabled!", Toast.LENGTH_SHORT).show();
-                }
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                startBluetoothScan();
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(this, "Bluetooth needs to be enabled!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
